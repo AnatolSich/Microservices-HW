@@ -38,6 +38,7 @@ public class MessageQueueConfig {
     @Bean
     public AmqpTemplate template(ConnectionFactory connectionFactory) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setReceiveTimeout(10_000);
         template.setMessageConverter(messageConverter());
         return template;
     }
