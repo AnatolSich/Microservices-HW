@@ -43,6 +43,10 @@ every (N) second(-s) (use Spring Scheduler for it)
 
 •	Scheduler should be logged by any Logger
 
+`Recipient - every 10s`
+
+`Collector - every 15s`
+
 (2 stars)
 
 6.UPDATE THE "DOCKER-COMPOSE.YML" WITH:
