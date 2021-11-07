@@ -1,0 +1,107 @@
+version: '3.7'
+
+services:
+  grafana:
+    build: './config/grafana'
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      monitoring:
+        aliases:
+          - grafana
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus:/prometheus
+    networks:
+      monitoring:
+        aliases:
+          - prometheus
+
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    expose:
+      - 5672
+    restart: always
+    networks:
+      - sender
+      - recipient
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=services
+    ports:
+      - 5432:5432
+    expose:
+      - 5432
+    networks:
+      - recipient
+
+  eureka-server-1:
+    image: eureka-server-1
+    ports:
+      - 8761:8761
+    expose:
+      - 8761
+    restart: always
+    networks:
+      - sender
+      - recipient
+
+  sender:
+    image: sender
+    ports:
+      - 8081:8081
+    expose:
+      - 8081
+    links:
+      - rabbitmq
+    networks:
+      - sender
+  recipient:
+    image: recipient
+    ports:
+      - 8082:8082
+    expose:
+      - 8082
+    links:
+      - rabbitmq
+    networks:
+      - recipient
+  collector:
+    image: collector
+    ports:
+      - 8083:8083
+    expose:
+      - 8083
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/services
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    links:
+      - rabbitmq
+      - postgres
+    networks:
+      - recipient
+
+networks:
+  monitoring:
+  sender:
+  recipient:
