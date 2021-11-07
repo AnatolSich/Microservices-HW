@@ -1,11 +1,9 @@
 package org.example.controller;
 
-import org.example.domain.User;
+import org.example.model.User;
 import org.example.repository.UserRepository;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -14,8 +12,11 @@ import java.util.List;
 @Log4j2
 public class RecipientController {
 
-    @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public RecipientController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @GetMapping("/message")
     public List<User> message() {
